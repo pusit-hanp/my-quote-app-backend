@@ -6,19 +6,34 @@ import {
   Patch,
   Param,
   Delete,
-  HttpCode,
-  HttpStatus,
   UseGuards,
   Request,
+  HttpCode,
+  HttpStatus,
   Query,
+  ParseIntPipe,
+  ParseEnumPipe,
 } from '@nestjs/common';
 import { QuotesService } from './quotes.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
+import { QuoteResponseDto } from './dto/quote-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@UseGuards(JwtAuthGuard) // Apply the guard to ALL routes in this controller
-@Controller('quotes') // Base path for all routes in this controller
+// Define enums for clarity and validation for sort parameters
+enum SortByOptions {
+  Votes = 'votes',
+  CreatedAt = 'createdAt',
+  UpdatedAt = 'updatedAt',
+}
+
+enum OrderOptions {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+@UseGuards(JwtAuthGuard)
+@Controller('quotes')
 export class QuotesController {
   constructor(private readonly quotesService: QuotesService) {}
 
@@ -28,10 +43,26 @@ export class QuotesController {
   }
 
   @Get()
-  findAll(@Query('q') q?: string, @Request() req?) {
-    // req.user contains the payload from your JWT (userId, email)
-    const userId = req.user ? req.user.userId : undefined; // Get userId from req.user
-    return this.quotesService.findAll(q, userId); // <-- Pass userId to service
+  findAll(
+    @Query('q') q?: string,
+    @Request() req?,
+    @Query('minVotes', new ParseIntPipe({ optional: true })) minVotes?: number,
+    @Query('maxVotes', new ParseIntPipe({ optional: true })) maxVotes?: number,
+    @Query('sortBy', new ParseEnumPipe(SortByOptions, { optional: true }))
+    sortBy?: SortByOptions,
+    @Query('order', new ParseEnumPipe(OrderOptions, { optional: true }))
+    order?: OrderOptions,
+  ): Promise<QuoteResponseDto[]> {
+    // Return type is QuoteResponseDto[]
+    const userId = req.user ? req.user.userId : undefined;
+    return this.quotesService.findAll(
+      q,
+      userId,
+      minVotes,
+      maxVotes,
+      sortBy,
+      order,
+    );
   }
 
   @Get(':id')
@@ -39,20 +70,19 @@ export class QuotesController {
     return this.quotesService.findOne(id);
   }
 
-  @Patch(':id') // Use Patch for partial updates
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateQuoteDto: UpdateQuoteDto) {
     return this.quotesService.update(id, updateQuoteDto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT) // 204 No Content on successful delete
+  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
     return this.quotesService.remove(id);
   }
 
   @Post(':id/vote')
-  async vote(@Param('id') id: string, @Request() req) {
-    // The user ID is available in req.user.userId from JwtStrategy
+  vote(@Param('id') id: string, @Request() req) {
     return this.quotesService.vote(id, req.user.userId);
   }
 }
