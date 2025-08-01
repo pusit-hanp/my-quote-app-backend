@@ -1,0 +1,72 @@
+### Create a new quote
+POST http://localhost:3000/quotes
+Content-Type: application/json
+
+{
+  "content": "The only way to do great work is to love what you do.",
+  "author": "Steve Jobs"
+}
+
+### Create another quote
+POST http://localhost:3000/quotes
+Content-Type: application/json
+
+{
+  "content": "Be yourself; everyone else is already taken."
+}
+
+### Get all quotes
+GET http://localhost:3000/quotes
+
+### Vote for a quote (replace with an actual ID from the GET request)
+POST http://localhost:3000/quotes/YOUR_QUOTE_ID_HERE/vote
+Content-Type: application/json
+
+### Get a single quote (replace with an actual ID)
+GET http://localhost:3000/quotes/YOUR_QUOTE_ID_HERE
+
+### Update a quote (only if votes are 0 - use a new quote)
+PATCH http://localhost:3000/quotes/YOUR_NEW_QUOTE_ID_HERE
+Content-Type: application/json
+
+{
+  "content": "Updated quote content."
+}
+
+### Delete a quote (only if votes are 0 - use a new quote)
+DELETE http://localhost:3000/quotes/YOUR_NEW_QUOTE_ID_HERE
+
+### Register a new user
+POST http://localhost:3000/users/register
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "password123"
+}
+
+### Login as the new user
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "password123"
+}
+
+### Try to get quotes without token (should fail 401 Unauthorized)
+GET http://localhost:3000/quotes
+
+### Get quotes with token (replace YOUR_ACCESS_TOKEN with the copied token)
+GET http://localhost:3000/quotes
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+### Create a new quote (with token)
+POST http://localhost:3000/quotes
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwic3ViIjoiNDc5ZjBiMDMtYWNiYy00YjZmLWI2NTctMWJjZmMzNTRiZjI4IiwiaWF0IjoxNzU0MDM0MzQ3LCJleHAiOjE3NTQwMzc5NDd9._JpLt0D42XUgIA82DDhsGBXKlPlRjE17rIJx20l9kAc
+
+{
+  "content": "The only constant in life is change.",
+  "author": "Heraclitus"
+}
